@@ -19,7 +19,7 @@ console.log(getFieldValues(usersData, 'user')); // --> ['Alex', 'Bob']
 // 2) Написать функцию, фильтрующую массив с использованием предиката:
 
 var numbers = [1, 2, 3, 5, 8, 13, 21, 34, 55];
-function isEven(x) { if (x%2===0) { return x } }
+function isEven(x) { if (x%2===0) { return true } }
 function filter(array, pred) {
     var arr = [];
     for(var i=0; i < numbers.length; i++) {
@@ -56,71 +56,50 @@ console.log(findSimilarWords(firstLongString, secondLongString)); // --> ['and']
 
 var IpAddress = '10.223.98.2';
 var subnetMask = 28;
-function generateBroadcastAndNetworsAddresses(IpAddress, subnetMask) {
-  ip = IpAddress.split('.');
-  var str = [];
-  var ip2 = "";
-  for (var i = 0; i < ip.length; i++) {
-    str[i] = "";
-    while (ip[i] > 0) {
-      if (ip[i] % 2 == 0) {
-        str[i] = str[i] + '0';
-        ip[i] /= 2;
-      }else {
-        str[i] = str[i] + '1';
-        ip[i]--;
-        ip[i] /= 2;
-      }
+function generateBroadcastAndNetworsAddresses(ip, mask) {
+    var arr;
+    arr = ip.split('.');
+    for(var i=0; i<arr.length; i++) {
+        arr[i] = +arr[i]; // переводим строки в числа
+        arr[i] = arr[i].toString(2); // затем переводим в 2 СС
+        while (arr[i].length < 8) {
+            arr[i] = '0' + arr[i]; // добавляем незначащих нулей
+        }
     }
-    str[i] = str[i].split("").reverse().join("");
-    while (str[i].length < 8) {
-      str[i] = '0' + str[i];
+    var str = '';
+    arr = arr.join('');
+    network = 32-mask;
+    for(var j=0; j<mask; j++) {
+        str = '1' + str;
     }
-    ip2 += str[i];
-  }
-  
-
-  var broadcastMask = 32-subnetMask;
-
-  var mask = "";
-  while (mask.length < 32) {
-    if (subnetMask > 0) {
-      mask += '1';
-      subnetMask--;
-    }else {
-      mask += '0';
+    for(j=0; j<network; j++) {
+        str = str + '0';
     }
-  }
-  var network = "";
-  for (var i = 0; i < 32; i++) {
-    if (parseInt(ip2[i]) * parseInt(mask[i]) == 1) {
-      network += '1';
-    }else {
-      network += '0';
+    var net ='';
+    var broad = '';
+    for(i=0; i<32; i++) {
+        if (i%8===0 && i !== 0) {
+            net = net + '.';
+            broad = broad + '.';
+        }
+        if (str[i] === '1') {
+            net = net + arr[i];
+            broad = broad + arr[i];
+        } else {
+            net = net + '0';
+            broad = broad + '1';
+        }
     }
-  }
-
-  var networkList = [];
-  var k = 0;
-  while (network != "") {
-    networkList[k] = network.slice(0,8);
-    network = network.replace(networkList[k], "");
-    k++;
-  }
-
-  var networkListInt = [];
-  k = 0;
-  for(var i = 0; i < networkList.length; i++) {
-    networkListInt[k] = 0;
-    for (var j = 0; j < networkList[i].length; j++) {
-      networkListInt[k] += parseInt(networkList[i][j] * Math.pow(2,7-j));
+    broad = broad.split('.');
+    net = net.split('.');
+    for (i=0; i<net.length; i++) {
+        broad[i] = parseInt(broad[i], 2);
+        net[i] = parseInt(net[i], 2);
     }
-    k++;
-  }
-  console.log("Broadcast - " + IpAddress.split(".", 3).join(".") + "." + (Math.pow(2, broadcastMask)-1) + ", Network - " + networkListInt.join("."));
-
+    return "Its broadcast " + broad + " its network " + net;
 }
-generateBroadcastAndNetworsAddresses(IpAddress, subnetMask); // Broadcast - 10.223.98.15, Network - 10.223.98.0
+
+console.log(generateBroadcastAndNetworsAddresses(IpAddress, subnetMask)); // Broadcast - 10.223.98.15, Network - 10.223.98.0
 // 5) Соединить все массивы в один, не допуская повторения элементов (порядок не важен):
 // P. S. 1 == '1' (строковое и числовое представление number'ов считать идентичными)
 
